@@ -78,10 +78,10 @@ pipeline {
                                             message: "Publish ${POLICY_NAME} to ${VARS[0]}?",
                                             parameters: [
                                               choice(
-                                                $class: 'ChoiceParameterDefinition',
+                                                [$class: 'ChoiceParameterDefinition',
                                                 name: 'Push-archive', 
                                                 choices: ['no', 'yes'].join('\n'),, 
-                                                description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
+                                                description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"]
                                               )
                                             ])
                 if ( "${VARS[1]}" == "auto" ) {
