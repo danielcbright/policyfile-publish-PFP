@@ -1,5 +1,3 @@
-def POLICY_NAME = "linux-base"
-def POLICY_ID = "4826c36e38d4ba4e0a614c26f673be06bd884a60e23cbbbf3aef04ee0e6b03f1"
 def POLICY_ARCHIVE = "${POLICY_NAME}-${POLICY_ID}.tgz"
 def POLICY_GROUPS_TXT
 def POLICY_GROUPS = [:]
@@ -72,24 +70,28 @@ pipeline {
         wrap([$class: 'ChefIdentityBuildWrapper', jobIdentity: 'jenkins-dbright']) {
           dir ("gcs-files") {
             script {
+              echo "Iterating policy_groups.txt in top->bottom order..."
+              echo "${POLICY_GROUPS_TXT}"
               for (GROUP in POLICY_GROUPS) {
                 def VARS = GROUP.split(':')
-                def userInputPushArchive = input (
+                if ( "${VARS[1]}" == "auto" ) {
+                  echo "POLICY_GROUP: ${VARS[0]} set to auto approve, running push-archive now"
+                  sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
+                } else if ( "${VARS[1]}" == "manual" ) {
+                  def userInputPushArchive = input (
                                             message: "Publish ${POLICY_NAME} to ${VARS[0]}?",
                                             parameters: [
                                               choice(
-                                                [$class: 'ChoiceParameterDefinition',
-                                                name: 'Push-archive', 
-                                                choices: ['no', 'yes'].join('\n'),, 
-                                                description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"]
+                                                name: 'Push-archive',
+                                                choices: ['no', 'yes'].join('\n'),
+                                                description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
                                               )
                                             ])
-                if ( "${VARS[1]}" == "auto" ) {
-                  echo "${VARS[0]} seto to auto-push, running push-archive now"
-                  sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
-                } else if ( "${VARS[1]}" == "manual" ) {
                   if ("${userInputPushArchive}" == "yes") {
+                    echo "POLICY_GROUP: ${VARS[0]} set to manual approve, approved and running push-archive now"
                     sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
+                  } else if ( "${userInputPushArchive}" == "no" ) {
+                    echo "Not pushing based on input"
                   }
                 }
               }
