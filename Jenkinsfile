@@ -81,9 +81,9 @@ pipeline {
                                               description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
                                             )
                                           ]
-              if VARS[1].contains('auto') {
+              if ( VARS[1].contains('auto') ) {
                 sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
-              } else if VARS[1].contains('manual') {
+              } else if ( VARS[1].contains('manual') ) {
                 if (userInputPushArchive == 'yes') {
                   sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
                 }
