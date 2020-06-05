@@ -34,7 +34,10 @@ mkdir azure-files'''
 
         stage('Download from Azure') {
           steps {
-            dir(path: 'azure-files')
+            dir(path: 'azure-files') {
+              azureDownload(storageCredentialId: 'test', downloadType: 'test')
+            }
+
           }
         }
 
