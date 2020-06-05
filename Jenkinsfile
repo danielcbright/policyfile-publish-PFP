@@ -78,14 +78,15 @@ pipeline {
                                             parameters: [
                                               choice(
                                                 name: 'Push-archive', 
-                                                choices: 'no\nyes', 
+                                                choices: ['no', 'yes'], 
                                                 description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
                                               )
                                             ]
-                if ( VARS[1].contains('auto') ) {
+                if ( "${VARS[1]}" == 'auto' ) {
+                  echo "${VARS[0]} seto to auto-push, running push-archive now"
                   sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
-                } else if ( VARS[1].contains('manual') ) {
-                  if (userInputPushArchive == 'yes') {
+                } else if ( "${VARS[1]}" == 'manual' ) {
+                  if ("${userInputPushArchive}" == 'yes') {
                     sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
                   }
                 }
