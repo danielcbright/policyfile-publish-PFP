@@ -71,21 +71,23 @@ pipeline {
       steps {
         wrap([$class: 'ChefIdentityBuildWrapper', jobIdentity: 'jenkins-dbright']) {
           dir ("gcs-files") {
-            for (GROUP in POLICY_GROUPS) {
-              def VARS = GROUP.split(':')
-              def userInputPushArchive = input message: "Publish ${POLICY_NAME} to ${VARS[0]}?",
-                                          parameters: [
-                                            choice(
-                                              name: 'Push-archive', 
-                                              choices: 'no\nyes', 
-                                              description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
-                                            )
-                                          ]
-              if ( VARS[1].contains('auto') ) {
-                sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
-              } else if ( VARS[1].contains('manual') ) {
-                if (userInputPushArchive == 'yes') {
+            script {
+              for (GROUP in POLICY_GROUPS) {
+                def VARS = GROUP.split(':')
+                def userInputPushArchive = input message: "Publish ${POLICY_NAME} to ${VARS[0]}?",
+                                            parameters: [
+                                              choice(
+                                                name: 'Push-archive', 
+                                                choices: 'no\nyes', 
+                                                description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
+                                              )
+                                            ]
+                if ( VARS[1].contains('auto') ) {
                   sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
+                } else if ( VARS[1].contains('manual') ) {
+                  if (userInputPushArchive == 'yes') {
+                    sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
+                  }
                 }
               }
             }
