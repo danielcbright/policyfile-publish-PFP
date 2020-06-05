@@ -51,33 +51,41 @@ pipeline {
         }
       }
     }
+
     // We'll work out of the GCS files since the download steps are just for demonstration purposes, change the directory to whatever storage you are using.
     stage('Prep Policy Group Stages') {
       steps {
+        dir ("gcs-files") {
+          script {
+            POLICY_GROUPS_TXT = sh (
+              script: '/usr/bin/cat policy_groups.txt',
+              returnStdout: true
+            ).trim()
+            POLICY_GROUPS = POLICY_GROUPS_TXT.split('\n')
+          }
+        }
+      }
+    }
+
+    stage('Push Policy') {
+      steps {
         wrap([$class: 'ChefIdentityBuildWrapper', jobIdentity: 'jenkins-dbright']) {
           dir ("gcs-files") {
-            script {
-              POLICY_GROUPS_TXT = sh (
-                script: '/usr/bin/cat policy_groups.txt',
-                returnStdout: true
-              ).trim()
-              POLICY_GROUPS = POLICY_GROUPS_TXT.split('\n')
-              for (GROUP in POLICY_GROUPS) {
-                def VARS = GROUP.split(':')
-                def userInputPushArchive = input message: "Publish ${POLICY_NAME} to ${VARS[0]}?",
-                                           parameters: [
-                                             choice(
-                                               name: 'Push-archive', 
-                                               choices: 'no\nyes', 
-                                               description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
-                                             )
-                                           ]
-                if (VARS[1] == 'auto') {
+            for (GROUP in POLICY_GROUPS) {
+              def VARS = GROUP.split(':')
+              def userInputPushArchive = input message: "Publish ${POLICY_NAME} to ${VARS[0]}?",
+                                          parameters: [
+                                            choice(
+                                              name: 'Push-archive', 
+                                              choices: 'no\nyes', 
+                                              description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
+                                            )
+                                          ]
+              if VARS[1].contains('auto') {
+                sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
+              } else if VARS[1].contains('manual') {
+                if (userInputPushArchive == 'yes') {
                   sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
-                } else if (VARS[1] == 'manual') {
-                  if (userInputPushArchive == 'yes') {
-                    sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
-                  }
                 }
               }
             }
