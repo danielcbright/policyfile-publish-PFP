@@ -74,19 +74,21 @@ pipeline {
             script {
               for (GROUP in POLICY_GROUPS) {
                 def VARS = GROUP.split(':')
-                def userInputPushArchive = input message: "Publish ${POLICY_NAME} to ${VARS[0]}?",
+                def userInputPushArchive = input (
+                                            message: "Publish ${POLICY_NAME} to ${VARS[0]}?",
                                             parameters: [
                                               choice(
+                                                $class: 'ChoiceParameterDefinition',
                                                 name: 'Push-archive', 
-                                                choices: ['no', 'yes'], 
+                                                choices: ['no', 'yes'].join('\n'),, 
                                                 description: "Choose \"yes\" to publish $POLICY_ARCHIVE to ${VARS[0]}"
                                               )
-                                            ]
-                if ( "${VARS[1]}" == 'auto' ) {
+                                            ])
+                if ( "${VARS[1]}" == "auto" ) {
                   echo "${VARS[0]} seto to auto-push, running push-archive now"
                   sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
-                } else if ( "${VARS[1]}" == 'manual' ) {
-                  if ("${userInputPushArchive}" == 'yes') {
+                } else if ( "${VARS[1]}" == "manual" ) {
+                  if ("${userInputPushArchive}" == "yes") {
                     sh "/opt/chef-workstation/bin/chef push-archive ${VARS[0]} $POLICY_ARCHIVE"
                   }
                 }
