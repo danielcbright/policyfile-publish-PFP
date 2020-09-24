@@ -1,22 +1,22 @@
 /* groovylint-disable NestedBlockDepth */
 /* groovylint-disable-next-line CompileStatic */
-String policyName = params.policyName
-String policyId = params.policyId
-String chefWrapperId = 'ChefIdentityBuildWrapper'
-String chefJobId = 'jenkins-dbright'
-String policyArchive = "${policyName}-${policyId}.tgz"
-String policyGroupsTxt
-String policyGroups = [:]
-String gcsDownloadDir = 'gcs-files'
-String s3DownloadDir = 's3-files'
-String azureStorageCredentialsId = 'fbc18e3a-1207-4a90-9f29-765a8b88ac86'
-String azureContainerName = 'policyfile-archive'
-String azureDownloadDir = 'azure-files'
-String gcsCredentialsId = 'gcs-policyfile-archive'
-String gcsBucket = 'gs://policyfile-archive'
-String awsWrapperId = 'aws-policyfile-archive'
-String awsWrapperRegion = 'us-east-1'
-String s3Bucket = 'dcb-policyfile-archive'
+def policyName = params.policyName
+def policyId = params.policyId
+def chefWrapperId = 'ChefIdentityBuildWrapper'
+def chefJobId = 'jenkins-dbright'
+def policyArchive = "${policyName}-${policyId}.tgz"
+def policyGroupsTxt
+def policyGroups = [:]
+def gcsDownloadDir = 'gcs-files'
+def s3DownloadDir = 's3-files'
+def azureStorageCredentialsId = 'fbc18e3a-1207-4a90-9f29-765a8b88ac86'
+def azureContainerName = 'policyfile-archive'
+def azureDownloadDir = 'azure-files'
+def gcsCredentialsId = 'gcs-policyfile-archive'
+def gcsBucket = 'gs://policyfile-archive'
+def awsWrapperId = 'aws-policyfile-archive'
+def awsWrapperRegion = 'us-east-1'
+def s3Bucket = 'dcb-policyfile-archive'
 
 pipeline {
   agent any
