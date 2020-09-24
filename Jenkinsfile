@@ -106,14 +106,14 @@ pipeline {
               echo "$policyGroupsTxt"
               for (group in policyGroups) {
                 vars = group.split(':')
-                String policyGroup = "${vars[0]}"
-                String policyDeploy = "${vars[1]}"
+                policyGroup = "${vars[0]}"
+                policyDeploy = "${vars[1]}"
                 if ( "$policyDeploy" == 'auto' ) {
                   echo "POLICY_GROUP: $policyGroup set to auto approve, running push-archive now"
                   sh "/opt/chef-workstation/bin/chef push-archive $policyGroup $policyArchive"
                 } else if ( "$policyDeploy" == 'manual' ) {
                   /* groovylint-disable-next-line NoDef, VariableTypeRequired */
-                  def userInputPushArchive = input (
+                  userInputPushArchive = input (
                     message: "Publish ${policyName} to $policyGroup?",
                     parameters: [
                       choice(
