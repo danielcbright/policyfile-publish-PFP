@@ -106,25 +106,29 @@ pipeline {
               echo "$policyGroupsTxt"
               for (group in policyGroups) {
                 vars = group.split(':')
-                policyGroup = "${vars[0]}"
-                policyDeploy = "${vars[1]}"
+                String policyGroup = "${vars[0]}"
+                String policyDeploy = "${vars[1]}"
                 if ( "$policyDeploy" == 'auto' ) {
                   echo "POLICY_GROUP: $policyGroup set to auto approve, running push-archive now"
                   sh "/opt/chef-workstation/bin/chef push-archive $policyGroup $policyArchive"
                 } else if ( "$policyDeploy" == 'manual' ) {
-                  userInputPushArchive = input (
+                  /* groovylint-disable-next-line NoDef, VariableTypeRequired */
+                  def userInputPushArchive = input (
                     message: "Publish ${policyName} to $policyGroup?",
                     parameters: [
                       choice(
                         name: 'Push-archive',
+                        /* groovylint-disable-next-line DuplicateStringLiteral */
                         choices: ['no', 'yes'].join('\n'),
                         description: "Choose \"yes\" to publish $policyArchive to $policyGroup"
                         )
                     ]
                   )
+                  /* groovylint-disable-next-line DuplicateStringLiteral */
                   if ("$userInputPushArchive" == 'yes') {
                     echo "POLICY_GROUP: $policyGroup set to manual approve, approved and running push-archive now"
                     sh "/opt/chef-workstation/bin/chef push-archive $policyGroup $policyArchive"
+                  /* groovylint-disable-next-line DuplicateStringLiteral */
                   } else if ( "$userInputPushArchive" == 'no' ) {
                     echo 'Not pushing based on input'
                   }
