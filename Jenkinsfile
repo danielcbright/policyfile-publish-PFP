@@ -35,7 +35,6 @@ pipeline {
             """
           }
         }
-
         stage('Download from GCS') {
           steps {
             dir(path: "$gcsDownloadDir") {
@@ -47,7 +46,6 @@ pipeline {
             }
           }
         }
-
         stage('Download from S3') {
           steps {
             dir(path: "$s3DownloadDir") {
