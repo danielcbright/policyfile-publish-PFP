@@ -1,10 +1,7 @@
 /* groovylint-disable NestedBlockDepth */
 /* groovylint-disable-next-line CompileStatic */
-def policyName = params.policyName
-def policyId = params.policyId
 def chefWrapperId = 'ChefIdentityBuildWrapper'
 def chefJobId = 'jenkins-dbright'
-def policyArchive = "${policyName}-${policyId}.tgz"
 def policyGroupsTxt
 def policyGroups = [:]
 def gcsDownloadDir = 'gcs-files'
@@ -20,11 +17,16 @@ def s3Bucket = 'dcb-policyfile-archive'
 
 pipeline {
   agent any
+  parameters {
+        string(defaultValue: 'NOTDEFINED', name: 'policyName', description: 'policyName')
+        string(defaultValue: 'NOTDEFINED', name: 'policyId', description: 'policyId')
+    }
   environment {
     HOME = '/root/'
   }
   stages {
     stage('Download Files') {
+      def policyArchive ="${params.policyName}-${params.policyId}.tgz"
       parallel {
         stage('Create Download Directories') {
           steps {
@@ -40,9 +42,9 @@ pipeline {
             dir(path: "$gcsDownloadDir") {
               googleStorageDownload(
                 credentialsId: "$gcsCredentialsId",
-                bucketUri: "$gcsBucket/$policyName/$policyId/*",
+                bucketUri: "$gcsBucket/${params.policyName}/${params.policyId}/*",
                 localDirectory: './',
-                pathPrefix: "$policyName/$policyId/")
+                pathPrefix: "${params.policyName}/${params.policyId}/")
             }
           }
         }
@@ -53,12 +55,12 @@ pipeline {
                 s3Download(
                   file: "$policyArchive",
                   bucket: "$s3Bucket",
-                  path: "$policyName/$policyId/$policyArchive"
+                  path: "${params.policyName}/${params.policyId}/$policyArchive"
                 )
                 s3Download(
                   file: 'policy_groups.txt',
                   bucket: "$s3Bucket",
-                  path: "$policyName/$policyId/policy_groups.txt"
+                  path: "${params.policyName}/${params.policyId}/policy_groups.txt"
                 )
               }
             }
@@ -72,7 +74,7 @@ pipeline {
                 containerName: "$azureContainerName",
                 flattenDirectories: true,
                 downloadType: 'container',
-                includeFilesPattern: "$policyName/$policyId/**",
+                includeFilesPattern: "${params.policyName}/${params.policyId}/**",
                 storageCredentialId: "$azureStorageCredentialsId"
               )
             }
@@ -112,7 +114,7 @@ pipeline {
                 } else if ( "$policyDeploy" == 'manual' ) {
                   /* groovylint-disable-next-line NoDef, VariableTypeRequired */
                   userInputPushArchive = input (
-                    message: "Publish ${policyName} to $policyGroup?",
+                    message: "Publish ${params.policyName} to $policyGroup?",
                     parameters: [
                       choice(
                         name: 'Push-archive',
