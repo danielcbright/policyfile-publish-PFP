@@ -33,9 +33,9 @@ pipeline {
               currentBuild.displayName = "${BUILD_NUMBER} - [${params.policyName}:${params.policyId}]"
             }
             sh """
-              mkdir $gcsDownloadDir
-              mkdir $s3DownloadDir
-              mkdir $azureDownloadDir
+              mkdir -p $gcsDownloadDir
+              mkdir -p $s3DownloadDir
+              mkdir -p $azureDownloadDir
             """
           }
         }
