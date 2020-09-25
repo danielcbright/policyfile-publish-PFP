@@ -21,7 +21,6 @@ pipeline {
         string(defaultValue: 'NOTDEFINED', name: 'policyName', description: 'policyName')
         string(defaultValue: 'NOTDEFINED', name: 'policyId', description: 'policyId')
     }
-  def policyArchive ="${params.policyName}-${params.policyId}.tgz"
   environment {
     HOME = '/root/'
   }
@@ -53,9 +52,9 @@ pipeline {
             dir(path: "$s3DownloadDir") {
               withAWS(credentials: "$awsWrapperId", region: "$awsWrapperRegion") {
                 s3Download(
-                  file: "$policyArchive",
+                  file: "${params.policyName}-${params.policyId}.tgz",
                   bucket: "$s3Bucket",
-                  path: "${params.policyName}/${params.policyId}/$policyArchive"
+                  path: "${params.policyName}/${params.policyId}/${params.policyName}-${params.policyId}.tgz"
                 )
                 s3Download(
                   file: 'policy_groups.txt',
@@ -110,7 +109,7 @@ pipeline {
                 policyDeploy = "${vars[1]}"
                 if ( "$policyDeploy" == 'auto' ) {
                   echo "POLICY_GROUP: $policyGroup set to auto approve, running push-archive now"
-                  sh "/opt/chef-workstation/bin/chef push-archive $policyGroup $policyArchive"
+                  sh "/opt/chef-workstation/bin/chef push-archive $policyGroup ${params.policyName}-${params.policyId}.tgz"
                 } else if ( "$policyDeploy" == 'manual' ) {
                   /* groovylint-disable-next-line NoDef, VariableTypeRequired */
                   userInputPushArchive = input (
@@ -120,14 +119,14 @@ pipeline {
                         name: 'Push-archive',
                         /* groovylint-disable-next-line DuplicateStringLiteral */
                         choices: ['no', 'yes'].join('\n'),
-                        description: "Choose \"yes\" to publish $policyArchive to $policyGroup"
+                        description: "Choose \"yes\" to publish ${params.policyName}-${params.policyId}.tgz to $policyGroup"
                         )
                     ]
                   )
                   /* groovylint-disable-next-line DuplicateStringLiteral */
                   if ("$userInputPushArchive" == 'yes') {
                     echo "POLICY_GROUP: $policyGroup set to manual approve, approved and running push-archive now"
-                    sh "/opt/chef-workstation/bin/chef push-archive $policyGroup $policyArchive"
+                    sh "/opt/chef-workstation/bin/chef push-archive $policyGroup ${params.policyName}-${params.policyId}.tgz"
                   /* groovylint-disable-next-line DuplicateStringLiteral */
                   } else if ( "$userInputPushArchive" == 'no' ) {
                     echo 'Not pushing based on input'
