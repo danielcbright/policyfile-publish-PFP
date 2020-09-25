@@ -29,6 +29,9 @@ pipeline {
       parallel {
         stage('Create Download Directories') {
           steps {
+            script {
+              currentBuild.displayName = "${BUILD_NUMBER} - [${params.policyName}:${params.policyId}]"
+            }
             sh """
               mkdir $gcsDownloadDir
               mkdir $s3DownloadDir
