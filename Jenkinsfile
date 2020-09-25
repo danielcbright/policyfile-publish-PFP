@@ -21,12 +21,12 @@ pipeline {
         string(defaultValue: 'NOTDEFINED', name: 'policyName', description: 'policyName')
         string(defaultValue: 'NOTDEFINED', name: 'policyId', description: 'policyId')
     }
+  def policyArchive ="${params.policyName}-${params.policyId}.tgz"
   environment {
     HOME = '/root/'
   }
   stages {
     stage('Download Files') {
-      def policyArchive ="${params.policyName}-${params.policyId}.tgz"
       parallel {
         stage('Create Download Directories') {
           steps {
